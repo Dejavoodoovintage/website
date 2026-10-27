@@ -363,6 +363,7 @@ const SHOP = {
   phone: "",          // optional, e.g. "(831) 555-0100"
   hold: [],           // item numbers reserved and waiting on payment, e.g. ["NV014","MX003"]
   sold: [],           // item numbers sold anywhere (here, eBay or Etsy), e.g. ["ZN007"]
+  removed: ["134264200526"], // eBay item numbers taken off the site entirely (other pieces keep their item numbers)
   // shipping by price, signature confirmation included from $200 (USPS signature $5.15, Priority small box $13.66, Oct 2026)
   shipping: [ {upTo: 200,    cost: 6.75,  note: "USPS, tracked, fully insured"},
               {upTo: 500,    cost: 12.95, note: "USPS, tracked, fully insured, signature on delivery"},
@@ -431,7 +432,7 @@ const PIECES = CATALOG.map(([id,title,price,cat,type,cond,size])=>{
   const ph = PHOTOS[id] || [];
   return {id, title: r.title || title, price, cat, type, imgs: r.imgs || ph[0] || [], note: r.note || ph[1] || "", specs,
           code: PREFIX[cat] + String(1000+seen[cat]).slice(1), ship: SHOP.shipping.find(s=>price<=s.upTo).cost, shipNote: SHOP.shipping.find(s=>price<=s.upTo).note};
-});
+}).filter(p=>!SHOP.removed.includes(p.id));
 const SOLD = new Set(SHOP.sold.map(s=>s.toUpperCase())), HOLD = new Set(SHOP.hold.map(s=>s.toUpperCase()));
 PIECES.forEach(p=>{ p.status = SOLD.has(p.code) ? "sold" : HOLD.has(p.code) ? "hold" : ""; });
 const BYID = {}; PIECES.forEach(p=>BYID[p.id]=p);
