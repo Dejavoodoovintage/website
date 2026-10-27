@@ -331,13 +331,13 @@ img[data-pid]:not([src]){visibility:hidden}
   function tick(){
     // costume pieces sparkle hard, the black page twinkles lightly everywhere
     const costume = visibleRects(".piece.sparkly .photo");
-    costume.forEach(r=>{ if (Math.random()<.22) spawn(glints, r.left+Math.random()*r.width, r.top+Math.random()*r.height, true); });
+    costume.forEach(r=>{ if (Math.random()<.11) spawn(glints, r.left+Math.random()*r.width, r.top+Math.random()*r.height, true); });
     const pr = document.querySelector(".panel").getBoundingClientRect();
     const top = Math.max(0,pr.top), bot = Math.min(innerHeight,pr.bottom);
-    if (bot>top && Math.random()<.14) spawn(glints, pr.left+Math.random()*pr.width, top+Math.random()*(bot-top), false);
+    if (bot>top && Math.random()<.07) spawn(glints, pr.left+Math.random()*pr.width, top+Math.random()*(bot-top), false);
     if (sheet.open && sheet.dataset.sparkly){
       if (sc.width !== sc.clientWidth*dpr) fit(sc);
-      if (Math.random()<.35) spawn(sheetGlints, Math.random()*sc.clientWidth, Math.random()*sc.clientHeight, true);
+      if (Math.random()<.17) spawn(sheetGlints, Math.random()*sc.clientWidth, Math.random()*sc.clientHeight, true);
     }
     draw(pctx, page, glints); draw(sctx, sc, sheetGlints);
     requestAnimationFrame(tick);
