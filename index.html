@@ -442,7 +442,9 @@ const insureFor = price => Math.ceil(price/100) * SHOP.insurePer100;
 const money = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: n%1?2:0, maximumFractionDigits:2});
 /* boxes, compacts and cases that also live in another collection */
 const VANITY_ALSO = new Set(["130977541792", "141079827932", "141191372792", "133061858890", "143519067677", "143897352408", "134026765762", "145909420132", "136251014065", "136505334725", "136862978035", "137221156102"]);
-const inCat = (p,k)=> (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && p.cat==="world") || (k==="costume" && p.cat==="bakelite") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
+/* ring boxes that live only in Purses & Compacts (they keep their original item numbers) */
+const VANITY_MOVED = new Set(["145546790789", "145546776433", "145523485133", "145523476554", "145198739878", "134859843220", "134755606279", "134660664218", "134567428473", "134709484633"]);
+const inCat = (p,k)=> VANITY_MOVED.has(p.id) ? (k==="all" || k==="vanity") : (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && p.cat==="world") || (k==="costume" && p.cat==="bakelite") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
 const TYPES = ["All types", ...Object.entries(PIECES.reduce((m,p)=>(m[p.type]=(m[p.type]||0)+1,m),{})).sort((a,b)=>b[1]-a[1]).map(e=>e[0])];
 const PAGE = 24;
 let current = "all", shown = PAGE;
