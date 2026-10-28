@@ -739,8 +739,11 @@ order.addEventListener("click", e=>{ if(e.target===order) order.close(); });
     b.shadowBlur=blur; b.shadowColor=col; b.fillStyle="#cfe9e6"; almond(b); b.fill(); }
   b.restore();
   b.save(); almond(b); b.clip();
-  g = b.createRadialGradient(CX,CY-10,30,CX,CY,300);
-  g.addColorStop(0,"#ffffff"); g.addColorStop(.35,"#f3f3f7"); g.addColorStop(.62,"#d9dbe4"); g.addColorStop(.85,"#b9c4cc"); g.addColorStop(1,"#9fb6b8");
+  g = b.createRadialGradient(CX-30,CY-45,20,CX,CY,290);  // a sphere lit from the upper left
+  g.addColorStop(0,"#ffffff"); g.addColorStop(.3,"#f2f2f6"); g.addColorStop(.55,"#d6d9e3"); g.addColorStop(.78,"#a9b6c0"); g.addColorStop(1,"#7f9aa0");
+  b.fillStyle=g; b.fillRect(0,0,LW,LH);
+  g = b.createRadialGradient(CX+190,CY+120,10,CX+190,CY+120,260);   // turning away from the light
+  g.addColorStop(0,"rgba(60,80,110,.38)"); g.addColorStop(1,"rgba(60,80,110,0)");
   b.fillStyle=g; b.fillRect(0,0,LW,LH);
   g = b.createRadialGradient(92,205,4,92,205,105);            // warm inner corner
   g.addColorStop(0,"rgba(232,170,176,.75)"); g.addColorStop(1,"rgba(232,170,176,0)");
@@ -750,10 +753,14 @@ order.addEventListener("click", e=>{ if(e.target===order) order.close(); });
   /* top layer: rim shading that rounds the eyeball, drawn over the moving iris */
   const rim=mk(LW*2,LH*2), r=rim.getContext("2d"); r.scale(2,2);
   r.save(); almond(r); r.clip();
-  for (let i=0;i<30;i++){ r.strokeStyle="rgba(40,60,70,.018)"; r.lineWidth=150-i*5; almond(r); r.stroke(); }
-  g = r.createLinearGradient(0,40,0,200);                      // soft shade from the top of the socket
-  g.addColorStop(0,"rgba(30,40,60,.35)"); g.addColorStop(1,"rgba(30,40,60,0)");
+  for (let i=0;i<30;i++){ r.strokeStyle="rgba(30,45,60,.03)"; r.lineWidth=150-i*5; almond(r); r.stroke(); }
+  g = r.createLinearGradient(0,30,0,175);                      // the upper lid casts its shadow across the eyeball
+  g.addColorStop(0,"rgba(20,26,48,.62)"); g.addColorStop(.45,"rgba(20,26,48,.22)"); g.addColorStop(1,"rgba(20,26,48,0)");
   r.fillStyle=g; r.fillRect(0,0,LW,LH);
+  r.strokeStyle="rgba(15,20,40,.55)"; r.lineWidth=14; r.save(); r.translate(0,3); almond(r); r.stroke(); r.restore();   // the lid's own thickness
+  r.restore();
+  r.save(); almond(r); r.clip();                               // a wet line of light along the lower lid
+  r.strokeStyle="rgba(255,255,255,.35)"; r.lineWidth=4; r.shadowColor="rgba(255,255,255,.6)"; r.shadowBlur=6; r.beginPath(); r.moveTo(150,318); r.bezierCurveTo(250,376,350,376,450,318); r.stroke(); r.shadowBlur=0;
   r.restore();
   r.lineWidth=2.5; r.strokeStyle="rgba(240,255,253,.85)"; almond(r); r.stroke();   // bright glassy rim
 
@@ -787,8 +794,18 @@ order.addEventListener("click", e=>{ if(e.target===order) order.close(); });
     // turning eyeball: the iris foreshortens as it moves to the side
     const ix=CX+gx, iy=CY+gy, fx=1-Math.min(.22,Math.abs(gx)/MX*.2), fy=1-Math.min(.12,Math.abs(gy)/MY*.1);
     c.save(); c.translate(ix,iy); c.scale(fx,fy);
-    c.shadowColor="rgba(20,24,50,.35)"; c.shadowBlur=14;
-    c.drawImage(iris,-IR,-IR,IR*2,IR*2); c.shadowBlur=0;
+    c.shadowColor="rgba(20,24,50,.5)"; c.shadowBlur=22; c.shadowOffsetX=6; c.shadowOffsetY=9;
+    c.drawImage(iris,-IR,-IR,IR*2,IR*2); c.shadowBlur=0; c.shadowOffsetX=0; c.shadowOffsetY=0;
+    // the iris sits like a shallow bowl under the clear dome: shaded at the top left, lit from within at the lower right
+    let d=c.createLinearGradient(-IR*.8,-IR*.8,IR*.8,IR*.8);
+    d.addColorStop(0,"rgba(16,18,48,.6)"); d.addColorStop(.55,"rgba(16,18,48,0)"); d.addColorStop(1,"rgba(16,18,48,0)");
+    c.fillStyle=d; c.beginPath(); c.arc(0,0,IR,0,Math.PI*2); c.fill();
+    d=c.createRadialGradient(IR*.42,IR*.42,0,IR*.42,IR*.42,IR*.62);
+    d.addColorStop(0,"rgba(215,222,255,.5)"); d.addColorStop(1,"rgba(215,222,255,0)");
+    c.fillStyle=d; c.beginPath(); c.arc(0,0,IR,0,Math.PI*2); c.fill();
+    d=c.createRadialGradient(gx*.06,gy*.06,PR*.9,gx*.06,gy*.06,PR*1.9);   // a darker ring where the iris folds in toward the pupil
+    d.addColorStop(0,"rgba(20,22,60,.55)"); d.addColorStop(1,"rgba(20,22,60,0)");
+    c.fillStyle=d; c.beginPath(); c.arc(0,0,IR,0,Math.PI*2); c.fill();
     // pupil: a flat, deep black opening with a soft edge, as in a real eye
     const px=gx*.06, py=gy*.06;
     let p=c.createRadialGradient(px,py,PR*.82,px,py,PR*1.12);
@@ -800,6 +817,12 @@ order.addEventListener("click", e=>{ if(e.target===order) order.close(); });
     p=c.createLinearGradient(-14,-12,14,12); p.addColorStop(0,"rgba(255,255,255,.92)"); p.addColorStop(1,"rgba(255,255,255,.55)");
     c.fillStyle=p; c.beginPath(); c.roundRect ? c.roundRect(-14,-12,28,24,7) : c.rect(-14,-12,28,24); c.fill(); c.restore();
     c.fillStyle="rgba(255,255,255,.55)"; c.beginPath(); c.arc(30,38,4,0,Math.PI*2); c.fill();
+    d=c.createRadialGradient(IR*.5,IR*.55,IR*.2,IR*.35,IR*.4,IR*.75);   // light bending through the lower edge of the dome
+    d.addColorStop(0,"rgba(220,228,255,0)"); d.addColorStop(.75,"rgba(220,228,255,.22)"); d.addColorStop(1,"rgba(220,228,255,0)");
+    c.fillStyle=d; c.beginPath(); c.arc(0,0,IR,0,Math.PI*2); c.fill();
+    d=c.createRadialGradient(-IR*.35,-IR*.4,4,-IR*.1,-IR*.1,IR*1.05);   // the clear dome of the cornea
+    d.addColorStop(0,"rgba(255,255,255,.14)"); d.addColorStop(.5,"rgba(255,255,255,.03)"); d.addColorStop(1,"rgba(255,255,255,0)");
+    c.fillStyle=d; c.beginPath(); c.arc(0,0,IR*1.04,0,Math.PI*2); c.fill();
     c.restore();
     // a soft reflection that stays put on the surface of the eye
     p=c.createRadialGradient(258,150,2,258,150,46);
