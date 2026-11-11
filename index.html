@@ -511,7 +511,7 @@ function filtered(cat = current){
 }
 function row(p){
   const specs = Object.entries(p.specs).map(([k,v])=>`${k}: ${v}`).join(" · ");
-  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id)?" sparkly":""}">
+  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id)?" sparkly":""}">
       <button class="photo" data-id="${p.id}" aria-label="Larger image of ${p.title.replace(/"/g,"&quot;")}">${imgTag(p, p.title)}${p.status?`<span class="tag">${p.status==="sold"?"Sold":"On hold"}</span>`:""}${p.imgs.length>1?`<span class="count">${p.imgs.length} photos</span>`:""}</button>
       <div class="details">
         <h3>${p.title}</h3>
