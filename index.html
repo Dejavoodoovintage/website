@@ -348,7 +348,7 @@ img[data-pid]:not([src]){visibility:hidden}
   }
   const TINTS = ["rgba(200,230,255,.35)","rgba(255,240,200,.35)","rgba(210,255,240,.35)","rgba(255,210,240,.3)"];
   function spawn(list, x, y, big){
-    list.push({x, y, s:(big?10:5)+Math.random()*(big?16:9), t:0, life:28+Math.random()*30, tint:TINTS[Math.random()*TINTS.length|0]});
+    list.push({x, y, s:(big?8:5)+Math.random()*(big?10:7), t:0, life:28+Math.random()*30, tint:TINTS[Math.random()*TINTS.length|0]});
   }
   function visibleRects(sel){
     return [...document.querySelectorAll(sel)].map(e=>e.getBoundingClientRect())
@@ -357,13 +357,13 @@ img[data-pid]:not([src]){visibility:hidden}
   function tick(){
     // costume pieces sparkle hard, the black page twinkles lightly everywhere
     const costume = visibleRects(".piece.sparkly .photo");
-    costume.forEach(r=>{ if (Math.random()<.055) spawn(glints, r.left+Math.random()*r.width, r.top+Math.random()*r.height, true); });
+    costume.forEach(r=>{ if (Math.random()<.012) spawn(glints, r.left+Math.random()*r.width, r.top+Math.random()*r.height, true); });
     const pr = document.querySelector(".panel").getBoundingClientRect();
     const top = Math.max(0,pr.top), bot = Math.min(innerHeight,pr.bottom);
-    if (bot>top && Math.random()<.035) spawn(glints, pr.left+Math.random()*pr.width, top+Math.random()*(bot-top), false);
+    if (bot>top && Math.random()<.01) spawn(glints, pr.left+Math.random()*pr.width, top+Math.random()*(bot-top), false);
     if (sheet.open && sheet.dataset.sparkly){
       if (sc.width !== sc.clientWidth*dpr) fit(sc);
-      if (Math.random()<.085) spawn(sheetGlints, Math.random()*sc.clientWidth, Math.random()*sc.clientHeight, true);
+      if (Math.random()<.025) spawn(sheetGlints, Math.random()*sc.clientWidth, Math.random()*sc.clientHeight, true);
     }
     draw(pctx, page, glints); draw(sctx, sc, sheetGlints);
     requestAnimationFrame(tick);
@@ -389,7 +389,7 @@ const SHOP = {
   phone: "",          // optional, e.g. "(831) 555-0100"
   hold: [],           // item numbers reserved and waiting on payment, e.g. ["NV014","MX003"]
   sold: ["SD006", "GD013", "NV186", "SD008", "MS175", "NV340", "NV018", "NV332", "ZN050", "NV052", "CJ045", "MS034", "NV323", "NA030", "SD004", "NA033", "NV241", "NV303", "MS053"],           // item numbers sold anywhere (here, eBay or Etsy), e.g. ["ZN007"]
-  removed: [], // eBay item numbers taken off the site entirely (other pieces keep their item numbers)
+  removed: ["147260780207", "147174487863", "145885247567", "134148599378", "133522351934"], // CJ005, CJ009, CJ033, BK089, BK096 // eBay item numbers taken off the site entirely (other pieces keep their item numbers)
   // shipping by price, signature confirmation included from $200 (USPS signature $5.15, Priority small box $13.66, Oct 2026)
   shipping: [ {upTo: 200,    cost: 6.75,  note: "USPS, tracked, fully insured"},
               {upTo: 500,    cost: 12.95, note: "USPS, tracked, fully insured, signature on delivery"},
