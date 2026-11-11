@@ -501,7 +501,7 @@ function filtered(cat = current){
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
-  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","world","gold"], costume:["bakelite","costume"]};
+  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","world","gold"], costume:["costume","bakelite"]};
   if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(STERLING_MOVED.has(p.id) ? "sterling" : p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
