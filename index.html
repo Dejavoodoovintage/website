@@ -470,7 +470,9 @@ const VANITY_ALSO = new Set(["130977541792", "141079827932", "141191372792", "13
 const VANITY_MOVED = new Set(["145546790789", "145546776433", "145523485133", "145523476554", "145198739878", "134859843220", "134755606279", "134660664218", "134567428473", "134709484633"]);
 /* Danecraft, Dweck and Gump's pieces that live in Mexican & Vintage Sterling (they keep their original item numbers) */
 const STERLING_MOVED = new Set(["145704283304", "147260821735", "145717846806", "145066735825", "144774172004", "144764406144", "144764400270", "144726837857", "143801724381", "136859748863", "134967639610", "134277363323", "134077834040", "141762647329", "137291219377", "137772296815"]);
-const inCat = (p,k)=> STERLING_MOVED.has(p.id) ? (k==="all" || k==="mexican") : VANITY_MOVED.has(p.id) ? (k==="all" || k==="vanity") : (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && (p.cat==="world" || p.cat==="gold")) || (k==="costume" && p.cat==="bakelite") || (k==="mexican" && p.cat==="sterling") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
+/* Italian micro mosaic pieces, shown together in Victorian & Antique (they keep their original item numbers) */
+const MOSAIC = new Set(["144793401687", "142800106695", "145954144202", "144528785918", "144528781559", "144503402961", "134203796492", "132205883135", "130988619891"]);
+const inCat = (p,k)=> MOSAIC.has(p.id) ? (k==="all" || k==="victorian") : STERLING_MOVED.has(p.id) ? (k==="all" || k==="mexican") : VANITY_MOVED.has(p.id) ? (k==="all" || k==="vanity") : (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && (p.cat==="world" || p.cat==="gold")) || (k==="costume" && p.cat==="bakelite") || (k==="mexican" && p.cat==="sterling") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
 const TYPES = ["All types", ...Object.entries(PIECES.reduce((m,p)=>(m[p.type]=(m[p.type]||0)+1,m),{})).sort((a,b)=>b[1]-a[1]).map(e=>e[0])];
 const PAGE = 24;
 let current = "all", shown = PAGE;
@@ -501,13 +503,13 @@ function filtered(cat = current){
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
-  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","world","gold"], costume:["costume","bakelite"]};
-  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(STERLING_MOVED.has(p.id) ? "sterling" : p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
+  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["costume","bakelite"]};
+  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : STERLING_MOVED.has(p.id) ? "sterling" : p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
 function row(p){
   const specs = Object.entries(p.specs).map(([k,v])=>`${k}: ${v}`).join(" · ");
-  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume"?" sparkly":""}">
+  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id)?" sparkly":""}">
       <button class="photo" data-id="${p.id}" aria-label="Larger image of ${p.title.replace(/"/g,"&quot;")}">${imgTag(p, p.title)}${p.status?`<span class="tag">${p.status==="sold"?"Sold":"On hold"}</span>`:""}${p.imgs.length>1?`<span class="count">${p.imgs.length} photos</span>`:""}</button>
       <div class="details">
         <h3>${p.title}</h3>
