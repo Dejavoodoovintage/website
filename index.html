@@ -497,6 +497,15 @@ function normQ(){
 /* match the start of a word, so "ring" finds rings but not earrings, and "turq" still finds turquoise */
 const _ws = {};
 const wordStart = w => _ws[w] || (_ws[w] = new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "i"));
+/* Costume: signed designer pieces first, each maker's pieces together, Schreiner leading; then unsigned costume, then brass & bronze, then Bakelite.
+   Modernist: brass & bronze pieces shown together after the silver. Pieces keep their item numbers. */
+const MAKERS = ["Schreiner","Alexander Korda","Avb","Bliss","Ciner","Coro","Delphine Nardin","Eisenberg","Hattie Carnegie","Hobe","Hollycraft","Holly Yashi","Jewels of Fantasy","Jomaz","Juliana","Kay Denning","La Roco","Laurel Burch","Louis Rousselet","Lunch At the Ritz","Mazer","Mcclelland Barclay","Michaela Frey","Mimi Musgrove","Miriam Haskell","Pell","Original by Robert","Regency","Schiaparelli","Steinbock","Swarovski","Trifari","Vendome","Weiss","Signed"];
+const makerOf = t => /\b(style|look|unsigned)\b/i.test(t) && !/\bsigned\b/i.test(t.replace(/unsigned/ig,"")) ? -1 : MAKERS.findIndex(m=>new RegExp("\\b"+m+"\\b","i").test(t));
+function subGroup(p){
+  if (p.cat==="costume" && makerOf(p.title)>=0) return "signed";
+  if ((p.cat==="costume" || p.cat==="modern") && /\b(brass|bronze)\b/i.test(p.title)) return "brass";
+  return p.cat;
+}
 function filtered(cat = current){
   const words = normQ();
   const ty = typeSel.value;
@@ -505,8 +514,8 @@ function filtered(cat = current){
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
-  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["costume","bakelite"]};
-  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : VICTORIAN_MOVED.has(p.id) ? "victorian" : STERLING_MOVED.has(p.id) ? "sterling" : p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
+  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["signed","costume","brass","bakelite"], modern:["modern","brass"]};
+  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : VICTORIAN_MOVED.has(p.id) ? "victorian" : STERLING_MOVED.has(p.id) ? "sterling" : subGroup(p)); return (n<0 ? 99 : n)*100 + (cat==="costume" && subGroup(p)==="signed" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) ? makerOf(p.title) : 0); }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
 function row(p){
