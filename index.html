@@ -491,10 +491,13 @@ function normQ(){
   const raw = q.value.trim().toLowerCase().replace(/#/g," ").replace(/\b([a-z]{2})\s+(\d{3})\b/g,"$1$2");
   return raw.split(/\s+/).filter(Boolean);
 }
+/* match the start of a word, so "ring" finds rings but not earrings, and "turq" still finds turquoise */
+const _ws = {};
+const wordStart = w => _ws[w] || (_ws[w] = new RegExp("(^|[^a-z0-9])" + w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"), "i"));
 function filtered(cat = current){
   const words = normQ();
   const ty = typeSel.value;
-  let list = PIECES.filter(p=>inCat(p,cat) && (ty==="All types" || p.type===ty) && words.every(w=>p.title.toLowerCase().includes(w) || p.code.toLowerCase()===w));
+  let list = PIECES.filter(p=>inCat(p,cat) && (ty==="All types" || p.type===ty) && words.every(w=>wordStart(w).test(p.title) || p.code.toLowerCase()===w));
   const s = sortSel.value;
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
