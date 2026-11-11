@@ -130,6 +130,13 @@ a{color:var(--teal)}
 .foot-links{display:flex;justify-content:center;gap:clamp(18px,5vw,40px);margin-top:36px}
 .foot-links a{font-family:var(--gothic);font-weight:700;font-size:1.2rem;text-decoration:none;color:var(--copper)}
 .foot-links a:hover{color:var(--copper-hi)}
+.toplinks{display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:4px 12px;margin-top:12px;font:500 .74rem var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.toplinks a{text-decoration:none}.toplinks a:hover{color:var(--white)}.toplinks span{color:var(--copper);font-size:.6rem}
+.policies .more-pol{grid-column:1/-1;text-align:center;margin:0;font:500 .8rem var(--mono);letter-spacing:.06em;text-transform:uppercase}
+.policies .more-pol a{text-decoration:none}
+.linkbtn{font:500 .7rem var(--mono);background:none;border:1px solid var(--line);color:var(--teal);padding:3px 7px;cursor:pointer;border-radius:2px}
+.linkbtn:hover{border-color:var(--teal)}
+.empty .alt{margin-top:14px}
 .fine{text-align:center;color:var(--muted);font-size:.85rem;margin-top:14px}
 
 /* larger image sheet */
@@ -211,6 +218,7 @@ img[data-pid]:not([src]){visibility:hidden}
     <div class="mast-center">
       <h1 class="logo">Deja-Voodoo</h1>
       <p class="tagline">Vintage Native American silver jewelry and artifacts, Mexican silver, Costume, Bakelite, Modernist, and antique and Victorian jewelry.</p>
+      <nav class="toplinks" aria-label="Shop information"><a href="/policies/#shipping">Shipping</a><span aria-hidden="true">&#9670;</span><a href="/policies/#returns">Returns</a><span aria-hidden="true">&#9670;</span><a href="/contact/">Contact Us</a></nav>
     </div>
     <svg class="diamond" viewBox="0 0 100 64" aria-hidden="true" style="transform:scaleX(-1)">
       <polygon points="22,4 78,4 98,22 50,62 2,22" fill="url(#dg)"/>
@@ -252,7 +260,7 @@ img[data-pid]:not([src]){visibility:hidden}
       <label class="field"><span>Type</span><select id="type"></select></label>
       <label class="field"><span>Sort</span><select id="sort"><option value="new">Newest first</option><option value="low">Price, low to high</option><option value="high">Price, high to low</option></select></label>
     </div>
-    <p class="hint"><span id="resultCount"></span> · <a href="#top">You have already been here, or have you?</a></p>
+    <p class="hint"><span id="resultCount"></span><span id="countDot"> · </span><a href="#top">You have already been here, or have you?</a></p>
     <div class="rows" id="rows"></div>
     <button class="more" id="more" hidden></button>
   </section>
@@ -262,12 +270,13 @@ img[data-pid]:not([src]){visibility:hidden}
     <div><h4>Only happy customers</h4><p>If you aren't happy with a piece, return it within two weeks of receiving it for a full refund, minus shipping.</p></div>
     <div><h4>Shipping</h4><p>Within the United States only, by USPS with tracking. One charge covers shipping and full insurance, plus a signature on delivery for pieces over $200. You'll see the exact amount when you reserve.</p></div>
     <div id="contact"><h4>How to buy</h4><p id="contactText"></p></div>
+    <p class="more-pol"><a href="/policies/">Read all our policies &rarr;</a></p>
   </section>
 
   <nav class="foot-links" aria-label="Footer">
     <a href="#collection">The Collection</a>
-    <a href="#contact">Contact Us</a>
-    <a href="#policies">Policies</a>
+    <a href="/contact/">Contact Us</a>
+    <a href="/policies/">Policies</a>
   </nav>
   <p class="fine">Deja-Voodoo Vintage · Santa Cruz, California · Dealing since the 1980s · Shipping within the United States</p>
  </div>
@@ -474,16 +483,21 @@ function renderChips(){
 function imgTag(p, alt){
   return `<img data-pid="${p.id}" alt="${alt.replace(/"/g,"&quot;")}">`;
 }
-function filtered(){
-  const words = q.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+/* "#MS052", "ms 052" and "MS052" all find the same piece */
+function normQ(){
+  const raw = q.value.trim().toLowerCase().replace(/#/g," ").replace(/\b([a-z]{2})\s+(\d{3})\b/g,"$1$2");
+  return raw.split(/\s+/).filter(Boolean);
+}
+function filtered(cat = current){
+  const words = normQ();
   const ty = typeSel.value;
-  let list = PIECES.filter(p=>inCat(p,current) && (ty==="All types" || p.type===ty) && words.every(w=>p.title.toLowerCase().includes(w) || p.code.toLowerCase()===w));
+  let list = PIECES.filter(p=>inCat(p,cat) && (ty==="All types" || p.type===ty) && words.every(w=>p.title.toLowerCase().includes(w) || p.code.toLowerCase()===w));
   const s = sortSel.value;
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
   const GROUPS = {hopizuni:["zuni","hopi"], victorian:["victorian","world","gold"], costume:["bakelite","costume"]};
-  if (GROUPS[current]){ const g = p=> { const n = GROUPS[current].indexOf(p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
+  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(p.cat); return n<0 ? 99 : n; }; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
 function row(p){
@@ -494,7 +508,7 @@ function row(p){
         <h3>${p.title}</h3>
         ${p.note ? `<p>${p.note}</p>` : ""}
         ${specs ? `<div class="measure">${specs}</div>` : ""}
-        <div class="buyline"><span class="price">${money(p.price)}</span><span class="itemno">Item #${p.code}</span>
+        <div class="buyline"><span class="price">${money(p.price)}</span><span class="itemno">Item #${p.code}</span><button class="linkbtn" type="button" data-link="${p.code}" aria-label="Copy a link to item ${p.code}">Copy link</button>
           ${p.status==="sold" ? `<span class="status sold">Sold</span>` : p.status==="hold" ? `<span class="status hold">On hold</span>` : `<button class="buy" data-buy="${p.id}">Reserve this piece</button>`}</div>
       </div>
     </article>`;
@@ -502,10 +516,12 @@ function row(p){
 function renderRows(){
   document.getElementById("bannerName").textContent = NAMES[current];
   const list = filtered();
+  document.getElementById("countDot").hidden = !list.length;
   document.getElementById("resultCount").textContent = list.length ? `${list.length.toLocaleString()} piece${list.length>1?"s":""}` : "";
   const more = document.getElementById("more");
   if (!list.length){
-    rows.innerHTML = `<div class="empty"><h3>Nothing in this case matches</h3><p>Try a different word or type, or <a href="#contact">ask us</a>; there is always more in the back room.</p></div>`;
+    const elsewhere = current !== "all" ? filtered("all").length : 0;
+    rows.innerHTML = `<div class="empty"><h3>Nothing in this case matches</h3><p>Try a different word or type, or <a href="/contact/">ask us</a>; there is always more in the back room.</p>${elsewhere ? `<p class="alt"><button class="buy" type="button" data-cat="all">Show ${elsewhere.toLocaleString()} match${elsewhere>1?"es":""} in All Pieces</button></p>` : ""}</div>`;
     more.hidden = true; return;
   }
   rows.innerHTML = list.slice(0, shown).map(row).join(""); hydrate();
@@ -526,6 +542,23 @@ typeSel.addEventListener("change", ()=>{ shown=PAGE; renderRows(); });
 sortSel.addEventListener("change", ()=>{ shown=PAGE; renderRows(); });
 document.getElementById("more").addEventListener("click", ()=>{ shown += PAGE; renderRows(); });
 renderChips(); renderRows();
+
+/* a link like dejavoodoovintage.com/#MS052 opens straight to that piece (handy for Instagram and texts) */
+function openFromHash(){
+  const m = location.hash.match(/^#([a-z]{2}\d{3})$/i); if (!m) return;
+  const code = m[1].toUpperCase(); if (!PIECES.some(p=>p.code===code)) return;
+  current = "all"; shown = PAGE; q.value = code; typeSel.value = "All types";
+  renderChips(); renderRows();
+  setTimeout(()=>document.getElementById("collection").scrollIntoView(), 50);
+}
+openFromHash(); addEventListener("hashchange", openFromHash);
+rows.addEventListener("click", e=>{
+  const b = e.target.closest("[data-link]"); if (!b) return;
+  const url = location.origin + "/#" + b.dataset.link;
+  const done = t=>{ b.textContent = t; setTimeout(()=>b.textContent="Copy link", 1800); };
+  if (navigator.clipboard) navigator.clipboard.writeText(url).then(()=>done("Copied!"), ()=>prompt("Copy this link:", url));
+  else prompt("Copy this link:", url);
+});
 
 /* larger image sheet */
 const sheet = document.getElementById("sheet");
