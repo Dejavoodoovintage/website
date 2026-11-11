@@ -513,7 +513,7 @@ function row(p){
         <h3>${p.title}</h3>
         ${p.note ? `<p>${p.note}</p>` : ""}
         ${specs ? `<div class="measure">${specs}</div>` : ""}
-        <div class="buyline"><span class="price">${money(p.price)}</span><span class="itemno">Item #${p.code}</span><button class="linkbtn" type="button" data-link="${p.code}" aria-label="Copy a link to item ${p.code}">Copy link</button>
+        <div class="buyline">${p.status==="sold" ? "" : `<span class="price">${money(p.price)}</span>`}<span class="itemno">Item #${p.code}</span><button class="linkbtn" type="button" data-link="${p.code}" aria-label="Copy a link to item ${p.code}">Copy link</button>
           ${p.status==="sold" ? `<span class="status sold">Sold</span>` : p.status==="hold" ? `<span class="status hold">On hold</span>` : `<button class="buy" data-buy="${p.id}">Reserve this piece</button>`}</div>
       </div>
     </article>`;
