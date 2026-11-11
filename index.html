@@ -77,6 +77,9 @@ a{color:var(--teal)}
 .g-aqua{--g:#6fd3f0;--g2:#1c6f8c}.g-sapphire{--g:#7f9cff;--g2:#22378f}.g-garnet{--g:#f07a8c;--g2:#7d1a2c}.g-pearl{--g:#eef0f6;--g2:#7c8296}.g-amethyst{--g:#c79cf0;--g2:#5c2c8c}
 .hub .gem.lit{animation:glint .9s ease}
 @keyframes glint{50%{filter:brightness(1.9)}}
+.cat.wake{animation:wake 1.1s ease}
+@keyframes wake{40%{color:var(--white);text-shadow:0 0 16px rgba(98,194,187,.95),0 0 4px #fff}}
+.nowrap{white-space:nowrap}
 .enter{text-align:center;font-size:clamp(1.05rem,2.2vw,1.3rem);margin:26px auto 0;max-width:40ch}
 
 /* collection */
@@ -248,7 +251,7 @@ img[data-pid]:not([src]){visibility:hidden}
     <span class="gem g-garnet" data-for="victorian" aria-hidden="true"></span>
     <button class="cat" data-cat="victorian">Victorian &amp; Antique</button>
   </nav>
-  <p class="enter">Enter one of the categories above and enjoy the eye candy that awaits you!</p>
+  <p class="enter">Move your cursor around the eye and click a category <span class="nowrap">(or tap one on your phone)</span> to enjoy the eye candy that awaits you!</p>
 
   <section class="collection" id="collection">
     <div class="banner">
@@ -736,6 +739,15 @@ order.addEventListener("click", e=>{ if(e.target===order) order.close(); });
       gm.style.width = gw+"px"; gm.style.height = gh+"px"; gm.style.left = (p.gx-gw/2)+"px"; gm.style.top = (p.gy+off-gh/2)+"px";
     }
     hub.classList.add("ready");
+    /* once, on first view: light each category in turn around the eye so visitors see they are buttons */
+    if (!hub.dataset.woke && !matchMedia("(prefers-reduced-motion: reduce)").matches){
+      hub.dataset.woke = "1";
+      const wake = ()=> ["navajo","mexican","modern","victorian","vanity","native","costume","hopizuni"].forEach((k,i)=>setTimeout(()=>{
+        const b = hub.querySelector('.cat[data-cat="'+k+'"]'), gm = hub.querySelector('.gem[data-for="'+k+'"]');
+        [b,gm].forEach(el=>{ if(!el) return; el.classList.remove(el===b?"wake":"lit"); void el.offsetWidth; el.classList.add(el===b?"wake":"lit"); });
+      }, 600 + i*260));
+      if ("IntersectionObserver" in window){ const io = new IntersectionObserver(es=>{ if(es[0].isIntersecting){ io.disconnect(); wake(); } }, {threshold:.5}); io.observe(hub); } else wake();
+    }
   }
   layout();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
