@@ -467,14 +467,16 @@ const money = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: n%1?2
 /* boxes, compacts and cases that also live in another collection */
 const VANITY_ALSO = new Set(["130977541792", "141079827932", "141191372792", "133061858890", "143519067677", "143897352408", "134026765762", "145909420132", "136251014065", "136505334725", "136862978035", "137221156102"]);
 /* ring boxes that live only in Purses & Compacts (they keep their original item numbers) */
-const VANITY_MOVED = new Set(["130977541792", "137148926836", "145546790789", "145546776433", "145523485133", "145523476554", "145198739878", "134859843220", "134755606279", "134660664218", "134567428473", "134709484633"]);
+const VANITY_MOVED = new Set(["130923305887", "130977541792", "137148926836", "145546790789", "145546776433", "145523485133", "145523476554", "145198739878", "134859843220", "134755606279", "134660664218", "134567428473", "134709484633"]);
 /* Danecraft, Dweck and Gump's pieces that live in Mexican & Vintage Sterling (they keep their original item numbers) */
 const STERLING_MOVED = new Set(["141299871550", "145704283304", "147260821735", "145717846806", "145066735825", "144774172004", "144764406144", "144764400270", "144726837857", "143801724381", "136859748863", "134967639610", "134277363323", "134077834040", "141762647329", "137291219377", "137772296815"]);
 /* Italian micro mosaic pieces, shown together in Victorian & Antique (they keep their original item numbers) */
+/* costume pieces that live only in Modernist & Scandinavian (they keep their original item numbers) */
+const MODERN_MOVED = new Set(["133447919065"]);
 const MOSAIC = new Set(["144793401687", "142800106695", "145954144202", "144528785918", "144528781559", "144503402961", "134203796492", "132205883135", "130988619891"]);
 /* pieces moved into Victorian & Antique, shown with the Victorian pieces (they keep their original item numbers) */
-const VICTORIAN_MOVED = new Set(["133447919065", "130923305887", "144947204658", "146022567108", "146416781433", "145791359880", "143945992106", "134792260449", "146971074598", "147007615033", "147010116409", "140994833718", "134967622586", "134234299634", "147260786875", "146614095460", "134234266991", "145793219452", "145110266311", "143604591127", "143542952891", "143742746473", "141395100447", "141079827932", "145322911090", "145588182044", "133878982860", "134742674583", "134710717945", "132796913223", "135091881601"]);
-const inCat = (p,k)=> (MOSAIC.has(p.id) || VICTORIAN_MOVED.has(p.id)) ? (k==="all" || k==="victorian") : STERLING_MOVED.has(p.id) ? (k==="all" || k==="mexican") : VANITY_MOVED.has(p.id) ? (k==="all" || k==="vanity") : (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && (p.cat==="world" || p.cat==="gold")) || (k==="costume" && p.cat==="bakelite") || (k==="mexican" && p.cat==="sterling") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
+const VICTORIAN_MOVED = new Set(["144947204658", "146022567108", "146416781433", "145791359880", "143945992106", "134792260449", "146971074598", "147007615033", "147010116409", "140994833718", "134967622586", "134234299634", "147260786875", "146614095460", "134234266991", "145793219452", "145110266311", "143604591127", "143542952891", "143742746473", "141395100447", "141079827932", "145322911090", "145588182044", "133878982860", "134742674583", "134710717945", "132796913223", "135091881601"]);
+const inCat = (p,k)=> (MOSAIC.has(p.id) || VICTORIAN_MOVED.has(p.id)) ? (k==="all" || k==="victorian") : STERLING_MOVED.has(p.id) ? (k==="all" || k==="mexican") : VANITY_MOVED.has(p.id) ? (k==="all" || k==="vanity") : MODERN_MOVED.has(p.id) ? (k==="all" || k==="modern") : (k==="vanity" && VANITY_ALSO.has(p.id)) || k==="all" || p.cat===k || (k==="native" && p.cat==="santo") || (k==="victorian" && (p.cat==="world" || p.cat==="gold")) || (k==="costume" && p.cat==="bakelite") || (k==="mexican" && p.cat==="sterling") || (k==="hopizuni" && (p.cat==="zuni" || p.cat==="hopi"));
 const TYPES = ["All types", ...Object.entries(PIECES.reduce((m,p)=>(m[p.type]=(m[p.type]||0)+1,m),{})).sort((a,b)=>b[1]-a[1]).map(e=>e[0])];
 const PAGE = 24;
 let current = "all", shown = PAGE;
@@ -518,12 +520,12 @@ function filtered(cat = current){
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
   const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["signed","figures","costume","brass","bakelite"], modern:["modern","brass"]};
-  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : VICTORIAN_MOVED.has(p.id) ? "victorian" : STERLING_MOVED.has(p.id) ? "sterling" : subGroup(p)); return (n<0 ? 99 : n)*100 + (cat==="costume" && subGroup(p)==="signed" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) ? makerOf(p.title) : 0); }; const pr = (x,y)=> cat==="costume" && s==="new" && subGroup(x)==="signed" && subGroup(y)==="signed" ? y.price-x.price : 0; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || pr(x[0],y[0]) || x[1]-y[1]).map(x=>x[0]); }
+  if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : VICTORIAN_MOVED.has(p.id) ? "victorian" : STERLING_MOVED.has(p.id) ? "sterling" : MODERN_MOVED.has(p.id) ? "modern" : subGroup(p)); return (n<0 ? 99 : n)*100 + (cat==="costume" && subGroup(p)==="signed" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) ? makerOf(p.title) : 0); }; const pr = (x,y)=> cat==="costume" && s==="new" && subGroup(x)==="signed" && subGroup(y)==="signed" ? y.price-x.price : 0; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || pr(x[0],y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
 function row(p){
   const specs = Object.entries(p.specs).map(([k,v])=>`${k}: ${v}`).join(" · ");
-  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id)?" sparkly":""}">
+  return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) && !MODERN_MOVED.has(p.id)?" sparkly":""}">
       <button class="photo" data-id="${p.id}" aria-label="Larger image of ${p.title.replace(/"/g,"&quot;")}">${imgTag(p, p.title)}${p.status?`<span class="tag">${p.status==="sold"?"Sold":"On hold"}</span>`:""}${p.imgs.length>1?`<span class="count">${p.imgs.length} photos</span>`:""}</button>
       <div class="details">
         <h3>${p.title}</h3>
