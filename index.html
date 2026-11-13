@@ -505,7 +505,10 @@ const MAKERS = ["Schreiner","Schiaparelli","Miriam Haskell","Hattie Carnegie","E
 const makerOf = t => /\bjuliana\b/i.test(t) ? MAKERS.indexOf("Juliana") : /\b(style|look|unsigned)\b/i.test(t) && !/\bsigned\b/i.test(t.replace(/unsigned/ig,"")) ? -1 : MAKERS.findIndex(m=>new RegExp("\\b"+m+"\\b","i").test(t));
 /* unsigned figural and animal costume pieces (brass ones included), shown together right after the signed designer pieces (they keep their item numbers) */
 const FIGURES = new Set(["145247675564", "145247671855", "144647294961", "144628176775", "144370089929", "144247420564", "143407101188", "142891261629", "142654196368", "142602854873", "137377574525", "137148926836", "136862917954", "136600816589", "136508777289", "134937044200", "134693429743", "134203788377", "134202642162", "134159552904", "133779746421", "133190489490", "132762658282", "132415452696", "131387331412", "130777522661", "130728964419", "130617042496", "130566140546", "145637659357", "145054506529", "133298371350", "131115130092", "130720751091", "137232578377", "130609314669"]);
+/* Other Native American page: boxes first, then jewelry, then the other non-jewelry pieces */
+const NATIVE_NONJEWELRY = {"147107651753":"box", "133788213936":"basket", "136874670486":"basket", "144038426637":"basket", "144789472711":"clothing", "134783537956":"clothing", "134783541907":"clothing", "134142153811":"spoon", "141950587222":"spoon", "133711521695":"carving", "134886517041":"carving"};
 function subGroup(p){
+  if (p.cat==="native" || p.cat==="santo") return NATIVE_NONJEWELRY[p.id] || "jewelry";
   if (p.cat==="costume" && makerOf(p.title)>=0) return "signed";
   if (FIGURES.has(p.id)) return "figures";
   if ((p.cat==="costume" || p.cat==="modern") && /\b(brass|bronze)\b/i.test(p.title)) return "brass";
@@ -519,7 +522,7 @@ function filtered(cat = current){
   if (s==="low") list.sort((a,b)=>a.price-b.price);
   else if (s==="high") list.sort((a,b)=>b.price-a.price);
   else list.sort((a,b)=> b.id.localeCompare(a.id));
-  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["signed","figures","costume","brass","bakelite"], modern:["modern","brass"]};
+  const GROUPS = {mexican:["mexican","sterling"], hopizuni:["zuni","hopi"], victorian:["victorian","mosaic","world","gold"], costume:["signed","figures","costume","brass","bakelite"], modern:["modern","brass"], native:["box","jewelry","basket","clothing","spoon","carving"]};
   if (GROUPS[cat]){ const g = p=> { const n = GROUPS[cat].indexOf(MOSAIC.has(p.id) ? "mosaic" : VICTORIAN_MOVED.has(p.id) ? "victorian" : STERLING_MOVED.has(p.id) ? "sterling" : MODERN_MOVED.has(p.id) ? "modern" : subGroup(p)); return (n<0 ? 99 : n)*100 + (cat==="costume" && subGroup(p)==="signed" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) ? makerOf(p.title) : 0); }; const pr = (x,y)=> cat==="costume" && s==="new" && subGroup(x)==="signed" && subGroup(y)==="signed" ? y.price-x.price : 0; list = list.map((p,i)=>[p,i]).sort((x,y)=> g(x[0])-g(y[0]) || pr(x[0],y[0]) || x[1]-y[1]).map(x=>x[0]); }
   return list;
 }
