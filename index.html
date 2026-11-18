@@ -463,6 +463,7 @@ const SOLD = new Set(SHOP.sold.map(s=>s.toUpperCase())), HOLD = new Set(SHOP.hol
 PIECES.forEach(p=>{ p.status = SOLD.has(p.code) ? "sold" : HOLD.has(p.code) ? "hold" : ""; });
 const BYID = {}; PIECES.forEach(p=>BYID[p.id]=p);
 const insureFor = price => Math.ceil(price/100) * SHOP.insurePer100;
+const shipFor = p => Math.ceil(p.ship + insureFor(p.price)); // shipping + insurance, rounded up to a whole dollar
 const money = n => "$" + n.toLocaleString("en-US", {minimumFractionDigits: n%1?2:0, maximumFractionDigits:2});
 /* boxes, compacts and cases that also live in another collection */
 const VANITY_ALSO = new Set(["130977541792", "141079827932", "141191372792", "133061858890", "143519067677", "143897352408", "134026765762", "145909420132", "136251014065", "136505334725", "136862978035", "137221156102"]);
@@ -641,9 +642,9 @@ document.addEventListener("click", e=>{
   document.getElementById("oCode").textContent = "Item #" + p.code;
   document.getElementById("oTitle").textContent = p.title;
   document.getElementById("oPrice").textContent = money(p.price);
-  document.getElementById("oShip").textContent = "$" + (p.ship + insureFor(p.price)).toFixed(2);
+  document.getElementById("oShip").textContent = money(shipFor(p));
   document.getElementById("oShipNote").textContent = p.shipNote;
-  document.getElementById("oTotal").textContent = money(p.price + p.ship + insureFor(p.price));
+  document.getElementById("oTotal").textContent = money(p.price + shipFor(p));
   rForm.hidden = false; rDone.hidden = true; rErr.hidden = true;
   document.getElementById("oAsk").innerHTML = SHOP.email ? `Just have a question about this piece? <a href="mailto:${esc(SHOP.email)}?subject=${encodeURIComponent("Question about #"+p.code+": "+p.title)}">Email us</a> at <b>${esc(SHOP.email)}</b>.` : "";
   order.showModal();
@@ -657,7 +658,7 @@ rForm.addEventListener("submit", e=>{
   rErr.hidden = true;
   const p = current_piece;
   const subject = `Reserve #${p.code}: ${p.title}`;
-  const body = `Please reserve this piece for me.`+`\n\nItem #${p.code}\n${p.title}\nListed at ${money(p.price)} + $${(p.ship + insureFor(p.price)).toFixed(2)} shipping & insurance (${p.shipNote}) = ${money(p.price + p.ship + insureFor(p.price))}\n\nName: ${name}\nEmail: ${email}` + (phone?`\nPhone: ${phone}`:"") + (note?`\n\nNote: ${note}`:"");
+  const body = `Please reserve this piece for me.`+`\n\nItem #${p.code}\n${p.title}\nListed at ${money(p.price)} + ${money(shipFor(p))} shipping & insurance (${p.shipNote}) = ${money(p.price + shipFor(p))}\n\nName: ${name}\nEmail: ${email}` + (phone?`\nPhone: ${phone}`:"") + (note?`\n\nNote: ${note}`:"");
   try { localStorage.setItem("dv-buyer", JSON.stringify({name, email, phone})); } catch(err){}
   if (SHOP.email){
     const mail = `mailto:${SHOP.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
