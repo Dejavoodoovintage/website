@@ -535,13 +535,11 @@ function filtered(cat = current){
   return list;
 }
 function row(p){
-  const specs = Object.entries(p.specs).map(([k,v])=>`${k}: ${v}`).join(" · ");
   return `<article class="piece${p.status==="sold"?" is-sold":""}${p.cat==="costume" && !MOSAIC.has(p.id) && !VICTORIAN_MOVED.has(p.id) && !STERLING_MOVED.has(p.id) && !MODERN_MOVED.has(p.id)?" sparkly":""}">
       <button class="photo" data-id="${p.id}" aria-label="Larger image of ${p.title.replace(/"/g,"&quot;")}">${imgTag(p, p.title)}${p.status?`<span class="tag">${p.status==="sold"?"Sold":"On hold"}</span>`:""}${p.imgs.length>1?`<span class="count">${p.imgs.length} photos</span>`:""}</button>
       <div class="details">
         <h3>${p.title}</h3>
         ${p.note ? `<p>${p.note}</p>` : ""}
-        ${specs ? `<div class="measure">${specs}</div>` : ""}
         <div class="buyline">${p.status==="sold" ? "" : `<span class="price">${money(p.price)}</span>`}<span class="itemno">Item #${p.code}</span><button class="linkbtn" type="button" data-link="${p.code}" aria-label="Copy a link to item ${p.code}">Copy link</button>
           ${p.status==="sold" ? `<span class="status sold">Sold</span>` : p.status==="hold" ? `<span class="status hold">On hold</span>` : `<button class="buy" data-buy="${p.id}">Reserve this piece</button>`}</div>
       </div>
